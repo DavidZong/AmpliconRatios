@@ -7,6 +7,8 @@
 *gz
 *zip
 
-# Sandboxing #
+# Sandboxing Delete this section later #
 sandbox.py
 sandbox.ipynb
+output.txt
+*.ipynb
