@@ -6,3 +6,7 @@
 *fastq
 *gz
 *zip
+
+# Sandboxing #
+sandbox.py
+sandbox.ipynb
