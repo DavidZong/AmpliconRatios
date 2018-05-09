@@ -12,5 +12,6 @@ sandbox.py
 sandbox.ipynb
 output.txt
 *.ipynb
-.ipynb_checkpoints
+/.ipynb_checkpoints
 */.ipynb_checkpoints/*
+/output
