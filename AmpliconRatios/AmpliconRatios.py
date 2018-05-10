@@ -31,7 +31,8 @@ class AmpliconRatios(object):
                          "GTGTGTCCGATGAACGCGACGTGAT",
                          "CTTGTTACGGGACCTAGTATCCCTA"]
 
-    def parse_paired_read(self, output_folder, output_file_raw, output_file_processed):
+    def parse_paired_read(self, output_folder, output_file_raw,
+                          output_file_processed):
         """
         The workhorse function that takes a pair of fastq files and returns
         location and barcode, saving as a .csv file (the raw one), also
@@ -45,6 +46,7 @@ class AmpliconRatios(object):
             index = 0
             omitted = 0
             wr = csv.writer(text_file, quoting=csv.QUOTE_ALL)
+            freq_table = initialize_freq_table()
             for record1, record2 in zip(
                     SeqIO.parse(self.forward_read, "fastq"),
                     SeqIO.parse(self.reverse_read, "fastq")):
@@ -55,16 +57,25 @@ class AmpliconRatios(object):
                 output.append(index)
                 output = output + indexing_result + row + barcode_result
                 print(output)
+                wr.writerow(output)
                 if -1 in output:
                     omitted += 1
                 else:
-                    wr.writerow(output)
+                    row = output[3]
+                    actual_barcode = output[-2]
+                    freq_table[row-1][actual_barcode] += 1
                 index += 1
-            print("Completed")
-            print("Number of sequences:", index)
-            print("Number of omissions:", omitted)
-            accepted_percent = (index - omitted) / index
-            print("Percent good:", accepted_percent)
+        print("Completed")
+        print("Number of sequences:", index)
+        print("Number of omissions:", omitted)
+        accepted_percent = (index - omitted) / index
+        print("Percent good:", accepted_percent)
+        print("Saving frequencies table...")
+        destination = os.path.join(output_folder, output_file_processed)
+        with open(destination, "w") as text_file:
+            wr = csv.writer(text_file, quoting=csv.QUOTE_ALL)
+            wr.writerows(freq_table)
+        print("Done.")
 
     # # For debugging only, delete later
     # def parse_first_pair(self):
