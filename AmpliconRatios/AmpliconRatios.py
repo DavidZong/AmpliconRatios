@@ -35,7 +35,7 @@ class AmpliconRatios(object):
                           output_file_processed):
         """
         The workhorse function that takes a pair of fastq files and returns
-        location and barcode, saving as a .csv file (the raw one), also
+        location on plate and barcode, saving as a .csv file (the raw one),
         calculates the frequency of each well and the barcode in that well
         :return:
         """
@@ -45,7 +45,7 @@ class AmpliconRatios(object):
         with open(destination, "w") as text_file:
             index = 0
             omitted = 0
-            wr = csv.writer(text_file, quoting=csv.QUOTE_ALL)
+            wr = csv.writer(text_file, quoting=csv.QUOTE_ALL , lineterminator='\n')
             freq_table = initialize_freq_table()
             for record1, record2 in zip(
                     SeqIO.parse(self.forward_read, "fastq"),
@@ -68,12 +68,17 @@ class AmpliconRatios(object):
         print("Completed")
         print("Number of sequences:", index)
         print("Number of omissions:", omitted)
-        accepted_percent = (index - omitted) / index
+        good_sequences = index - omitted
+        accepted_percent = good_sequences / index
         print("Percent good:", accepted_percent)
         print("Saving frequencies table...")
+        # for j in range(54):
+        #     sum_of_well = freq_table[j][0] + freq_table[j][1] + freq_table[j][2]
+        #     freq_table[j][3:6] = [quantity / sum_of_well for quantity in freq_table[j][0:3]]
+        #     freq_table[6] = sum_of_well / good_sequences
         destination = os.path.join(output_folder, output_file_processed)
         with open(destination, "w") as text_file:
-            wr = csv.writer(text_file, quoting=csv.QUOTE_ALL)
+            wr = csv.writer(text_file, quoting=csv.QUOTE_ALL, lineterminator='\n')
             wr.writerows(freq_table)
         print("Done.")
 
