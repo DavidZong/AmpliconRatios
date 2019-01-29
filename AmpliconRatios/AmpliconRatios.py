@@ -53,6 +53,9 @@ class AmpliconRatios(object):
                 output = []
                 indexing_result = self.match_indices(record1, record2)
                 barcode_result = self.find_barcode(record1, record2)
+                if barcode_result == -1:
+                    # Try doing alignment
+                    barcode_result = self.align_barcode(record1, record2)
                 row = calculate_row(indexing_result)
                 output.append(index)
                 output = output + indexing_result + row + barcode_result
@@ -118,23 +121,26 @@ class AmpliconRatios(object):
         result[1] = index_iterate(first5_r, self.reverse_indices)
         return result
 
-    # # Ideally this should be used for finding barcodes to reduce rejected sequences
-    # def align_barcode(self, forward_sequence, reverse_sequence, sensitivity):
-    #     """
-    #     Takes in the forward and reverse sequence and tries aligning the
-    #     three different barcodes to both sequences.
-    #     :param forward_sequence: the forward sequence as a Biopython Seqrecord
-    #     :param reverse_sequence: the reverse sequence as a Biopython Seqrecord
-    #     :param sensitivity: an integer that sets the minimum acceptable score
-    #     :return: -1 if no alignments found, otherwise the index of the
-    #     alignment along with the name of the barcode as a list of length 2
-    #     """
-    #     seq1 = forward_sequence.seq
-    #     seq2 = reverse_sequence.seq
-    #     seq2_rc = seq2.reverse_complement()
-    #     for index, barcode in enumerate(self.barcodes):
-    #         alignment_f = pairwise2.align.globalxx(seq1, barcode)
-    #         alignment_r = pairwise2.align.globalxx(seq2_rc, barcode)
+    # Ideally this should be used for finding barcodes to reduce rejected sequences
+    def align_barcode(self, forward_sequence, reverse_sequence, sensitivity):
+        """
+        Takes in the forward and reverse sequence and tries aligning the
+        three different barcodes to both sequences.
+        :param forward_sequence: the forward sequence as a Biopython Seqrecord
+        :param reverse_sequence: the reverse sequence as a Biopython Seqrecord
+        :param sensitivity: an integer that sets the minimum acceptable score
+        :return: -1 if no alignments found, otherwise the index of the
+        alignment along with the name of the barcode as a list of length 2
+        """
+        score_f, score_r = [None] * 3
+        seq1 = forward_sequence.seq
+        seq2 = reverse_sequence.seq
+        seq2_rc = seq2.reverse_complement()
+        for index, barcode in enumerate(self.barcodes):
+            score_f[index] = pairwise2.align.globalxx(seq1, barcode)
+            score_r[index] = pairwise2.align.globalxx(seq2_rc, barcode)
+
+
 
     def find_barcode(self, forward_sequence, reverse_sequence):
         """
