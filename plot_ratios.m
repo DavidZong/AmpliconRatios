@@ -2,8 +2,8 @@ clc
 close all
 
 % Load data from .csv
-pre = clean_csv_read('output/180423_NGS_pre_counts.csv');
-post = clean_csv_read('output/180423_NGS_post_counts.csv');
+pre = clean_csv_read('output/FFL5_NGS_pre_counts.csv');
+post = clean_csv_read('output/FFL5_NGS_post_counts.csv');
 
 % slice pre data to relevant wells
 pre = pre(1:6:end, :);
@@ -22,7 +22,7 @@ end
 x = [0.1:0.1:0.9]'*(2/3);
 y = flipud(x);
 z = ones(9,1)*(1/3);
-actual_ratios = [x,y,z];
+actual_ratios = flipud([x,y,z]);
 
 
 % plot
