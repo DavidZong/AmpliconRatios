@@ -53,9 +53,8 @@ class AmpliconRatios(object):
                 output = []
                 indexing_result = self.match_indices(record1, record2)
                 barcode_result = self.find_barcode(record1, record2)
-                if barcode_result == -1:
-                    # Try doing alignment
-                    barcode_result = self.align_barcode(record1, record2)
+                if -1 in barcode_result:
+                    barcode_result = self.align_barcode(record1, record2, 20)
                 row = calculate_row(indexing_result)
                 output.append(index)
                 output = output + indexing_result + row + barcode_result
@@ -128,19 +127,29 @@ class AmpliconRatios(object):
         three different barcodes to both sequences.
         :param forward_sequence: the forward sequence as a Biopython Seqrecord
         :param reverse_sequence: the reverse sequence as a Biopython Seqrecord
-        :param sensitivity: an integer that sets the minimum acceptable score
+        :param sensitivity: an integer that sets the minimum acceptable score, perfect is 25
         :return: -1 if no alignments found, otherwise the index of the
         alignment along with the name of the barcode as a list of length 2
         """
-        score_f, score_r = [None] * 3
+        score_f = [None] * 3
+        score_r = [None] * 3
         seq1 = forward_sequence.seq
         seq2 = reverse_sequence.seq
         seq2_rc = seq2.reverse_complement()
         for index, barcode in enumerate(self.barcodes):
-            score_f[index] = pairwise2.align.globalxx(seq1, barcode)
-            score_r[index] = pairwise2.align.globalxx(seq2_rc, barcode)
-
-
+            score_f[index] = pairwise2.align.localms(seq1, barcode, 1, -1, -5, -1, score_only=True)
+            score_r[index] = pairwise2.align.localms(seq2_rc, barcode, 1, -1, -5, -1, score_only=True)
+        max_f = max(score_f)
+        max_r = max(score_r)
+        if max(max_f, max_r) > sensitivity:
+            output = [None] * 3
+            output[0] = score_f.index(max_f)
+            output[1] = score_r.index(max_r)
+            barcode_names = ['X', 'Y', 'Z']
+            output[2] = barcode_names[output[0]]
+            return output
+        else:
+            return -1
 
     def find_barcode(self, forward_sequence, reverse_sequence):
         """
