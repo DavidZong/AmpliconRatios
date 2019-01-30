@@ -52,8 +52,9 @@ class AmpliconRatios(object):
                     SeqIO.parse(self.reverse_read, "fastq")):
                 output = []
                 indexing_result = self.match_indices(record1, record2)
-                if -1 in indexing_result:
-                    indexing_result = self.align_index(record1, record2, 4)
+                # Uncomment for barcode index alignment
+                # if -1 in indexing_result:
+                #     indexing_result = self.align_index(record1, record2, 4)
                 barcode_result = self.find_barcode(record1, record2)
                 if -1 in barcode_result:
                     barcode_result = self.align_barcode(record1, record2, 20)
