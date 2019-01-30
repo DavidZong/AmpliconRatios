@@ -149,7 +149,7 @@ class AmpliconRatios(object):
             output[2] = barcode_names[output[0]]
             return output
         else:
-            return -1
+            return [-1, -1, None]
 
     def find_barcode(self, forward_sequence, reverse_sequence):
         """
